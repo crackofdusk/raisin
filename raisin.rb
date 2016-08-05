@@ -38,10 +38,21 @@ test_failure do
   assert_equal("foo", "bar")
 end
 
+class TestSuite
+  def run
+    test_names = public_methods(false).grep(/^test_/)
 
-def run_suite(suite)
-  suite.public_methods(false).each do |test|
-    suite.send(test)
+    test_names.each do |test|
+      setup
+      send(test)
+      teardown
+    end
+  end
+
+  def setup
+  end
+
+  def teardown
   end
 end
 
@@ -49,7 +60,7 @@ def greet(name = nil)
   ['Hello', name].compact.join(", ") + "!"
 end
 
-class GreetingTestSuite
+class GreetingTestSuite < TestSuite
   def test_with_name
     assert_equal("Hello, Bob!", greet("Bob"))
   end
@@ -59,7 +70,7 @@ class GreetingTestSuite
   end
 end
 
-run_suite(GreetingTestSuite.new)
+GreetingTestSuite.new.run
 
 
 puts "Success!"
