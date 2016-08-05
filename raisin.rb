@@ -39,4 +39,27 @@ test_failure do
 end
 
 
+def run_suite(suite)
+  suite.public_methods(false).each do |test|
+    suite.send(test)
+  end
+end
+
+def greet(name = nil)
+  ['Hello', name].compact.join(", ") + "!"
+end
+
+class GreetingTestSuite
+  def test_with_name
+    assert_equal("Hello, Bob!", greet("Bob"))
+  end
+
+  def test_without_name
+    assert_equal("Hello!", greet)
+  end
+end
+
+run_suite(GreetingTestSuite.new)
+
+
 puts "Success!"
