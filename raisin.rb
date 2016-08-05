@@ -14,8 +14,10 @@ def test_failure(&block)
   raise NothingRaised unless raised
 end
 
-def assert(condition)
-  raise AssertionError unless condition
+def assert(condition, failure_reason = nil)
+  unless condition
+    raise AssertionError, failure_reason
+  end
 end
 
 assert(true)
@@ -26,7 +28,8 @@ end
 
 
 def assert_equal(expected, actual)
-  assert(expected == actual)
+  message = "Expected #{expected.inspect}, got #{actual.inspect}"
+  assert(expected == actual, message)
 end
 
 assert_equal(true, true)
