@@ -52,22 +52,18 @@ class TestSuite
   end
 
   def run
-    runs = 0
-    failures = 0
+    report = Report.new
     test_names = public_methods(false).grep(/^test_/)
 
     test_names.each do |test|
-      setup
-      begin
+      result = TestResult.from do
+        setup
         send(test)
-      rescue AssertionError
-        failures = failures + 1
+        teardown
       end
-      runs = runs + 1
-      teardown
+      report.add_result(result)
     end
-
-    Report.new(runs, failures)
+    report
   end
 
   def setup
@@ -77,12 +73,45 @@ class TestSuite
   end
 end
 
+class TestResult
+  def self.from(&block)
+    begin
+      yield
+      TestSuccess.new
+    rescue AssertionError
+      TestFailure.new
+    end
+  end
+end
+
+class TestSuccess
+  def success?
+    true
+  end
+end
+
+class TestFailure
+  def success?
+    false
+  end
+end
+
 class Report
   attr_reader :runs, :failures
 
-  def initialize(runs, failures)
-    @runs = runs
-    @failures = failures
+  def initialize
+    @runs = 0
+    @failures = 0
+  end
+
+  def add_result(result)
+    if result.success?
+      print "."
+    else
+      @failures = @failures + 1
+      print "F"
+    end
+    @runs = @runs + 1
   end
 end
 
