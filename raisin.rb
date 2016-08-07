@@ -51,8 +51,8 @@ class TestSuite
     end
   end
 
-  def run
-    report = Report.new
+  def run(io = $stdout)
+    report = Report.new(io)
     test_names = public_methods(false).grep(/^test_/)
 
     test_names.each do |test|
@@ -99,20 +99,25 @@ end
 class Report
   attr_reader :runs, :failures
 
-  def initialize
+  def initialize(io)
+    @io = io
     @runs = 0
     @failures = 0
   end
 
   def add_result(result)
     if result.success?
-      print "."
+      io.print "."
     else
       @failures = @failures + 1
-      print "F"
+      io.print "F"
     end
     @runs = @runs + 1
   end
+
+  private
+
+  attr_accessor :io
 end
 
 class DummySuite < TestSuite
@@ -125,8 +130,10 @@ class DummySuite < TestSuite
   end
 end
 
-result = DummySuite.new.run
-assert_equal 2, result.runs
-assert_equal 1, result.failures
+output = StringIO.new
+report = DummySuite.new.run(output)
+assert_equal(2, report.runs)
+assert_equal(1, report.failures)
+assert_equal("F.", output.string)
 
 puts "Success!"
