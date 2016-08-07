@@ -63,6 +63,7 @@ class TestSuite
       end
       report.add_result(result)
     end
+    report.summarize
     report
   end
 
@@ -78,8 +79,8 @@ class TestResult
     begin
       yield
       TestSuccess.new
-    rescue AssertionError
-      TestFailure.new
+    rescue AssertionError => error
+      TestFailure.new(error)
     end
   end
 end
@@ -91,28 +92,50 @@ class TestSuccess
 end
 
 class TestFailure
+  attr_reader :error
+
+  def initialize(error)
+    @error = error
+  end
+
   def success?
     false
   end
 end
 
 class Report
-  attr_reader :runs, :failures
+  attr_reader :runs
 
   def initialize(io)
     @io = io
     @runs = 0
-    @failures = 0
+    @errors = []
   end
 
   def add_result(result)
     if result.success?
       io.print "."
     else
-      @failures = @failures + 1
+      @errors << result.error
       io.print "F"
     end
     @runs = @runs + 1
+  end
+
+  def failures
+    @errors.count
+  end
+
+  def summarize
+    io.puts
+    @errors.each do |failure|
+      io.puts
+      io.puts failure.message
+      io.puts failure.backtrace
+      io.puts
+    end
+    io.puts
+    io.puts "#{runs} runs, #{failures} failures"
   end
 
   private
@@ -134,6 +157,21 @@ output = StringIO.new
 report = DummySuite.new.run(output)
 assert_equal(2, report.runs)
 assert_equal(1, report.failures)
-assert_equal("F.", output.string)
+assert(output.string.include?("F."))
+
+suite = Class.new(TestSuite) do
+  def test_1
+    assert(false, "failure1")
+  end
+
+  def test_2
+    assert(false, "failure2")
+  end
+end
+output = StringIO.new
+report = suite.new.run(output)
+assert(output.string.include?("failure1"), "Report does not include error details")
+assert(output.string.include?("failure2"), "Report does not include error details")
+assert(output.string.include?("2 runs, 2 failures"), "Report does not include statistics")
 
 puts "Success!"
