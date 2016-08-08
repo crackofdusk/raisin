@@ -1,4 +1,4 @@
-require_relative './raisin'
+require_relative './autorun'
 
 class NothingRaised < StandardError
 end
@@ -89,5 +89,3 @@ def define_suite(&block)
   TestSuite.unregister(suite)
   suite
 end
-
-TestSuite.run
