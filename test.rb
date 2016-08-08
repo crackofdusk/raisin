@@ -44,12 +44,9 @@ class AssertionTests < TestSuite
   end
 end
 
-AssertionTests.new.run
-
-
 class ReportingTests < TestSuite
   def test_statistics
-    suite = Class.new(TestSuite) do
+    suite = define_suite do
       def test_equality
         assert_equal(1, 2)
       end
@@ -68,7 +65,7 @@ class ReportingTests < TestSuite
   end
 
   def test_summary
-    suite = Class.new(TestSuite) do
+    suite = define_suite do
       def test_1
         assert(false, "failure1")
       end
@@ -77,6 +74,7 @@ class ReportingTests < TestSuite
         assert(false, "failure2")
       end
     end
+
     output = StringIO.new
     suite.new.run(output)
     assert(output.string.include?("failure1"),
@@ -86,4 +84,10 @@ class ReportingTests < TestSuite
   end
 end
 
-ReportingTests.new.run
+def define_suite(&block)
+  suite = Class.new(TestSuite, &block)
+  TestSuite.unregister(suite)
+  suite
+end
+
+TestSuite.run

@@ -23,6 +23,10 @@ class TestSuite
     @suites << suite
   end
 
+  def self.unregister(suite)
+    @suites.delete(suite)
+  end
+
   def self.run
     @suites.each do |suite|
       suite.new.run
