@@ -1,18 +1,22 @@
 class AssertionError < StandardError
 end
 
-def assert(condition, failure_reason = nil)
-  unless condition
-    raise AssertionError, failure_reason
+module Assertions
+  def assert(condition, failure_reason = nil)
+    unless condition
+      raise AssertionError, failure_reason
+    end
+  end
+
+  def assert_equal(expected, actual)
+    message = "Expected #{expected.inspect}, got #{actual.inspect}"
+    assert(expected == actual, message)
   end
 end
 
-def assert_equal(expected, actual)
-  message = "Expected #{expected.inspect}, got #{actual.inspect}"
-  assert(expected == actual, message)
-end
-
 class TestSuite
+  include Assertions
+
   @suites = []
 
   def self.inherited(suite)
