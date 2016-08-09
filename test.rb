@@ -57,7 +57,9 @@ class ReportingTests < TestSuite
     end
 
     output = StringIO.new
-    report = suite.new.run(output)
+    report = suite.new.run(Report.new(output))
+    report.summarize
+
     assert_equal(2, report.runs)
     assert_equal(1, report.failures)
     assert(output.string.include?("2 runs, 1 failures"),
@@ -76,7 +78,10 @@ class ReportingTests < TestSuite
     end
 
     output = StringIO.new
-    suite.new.run(output)
+    report = Report.new(output)
+    suite.new.run(report)
+    report.summarize
+
     assert(output.string.include?("failure1"),
            "Report does not include error details")
     assert(output.string.include?("failure2"),

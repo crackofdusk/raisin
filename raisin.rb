@@ -27,14 +27,17 @@ class TestSuite
     @suites.delete(suite)
   end
 
-  def self.run
+  def self.run(io = $stdout)
+    report = Report.new(io)
+
     @suites.each do |suite|
-      suite.new.run
+      suite.new.run(report)
     end
+
+    report.summarize
   end
 
-  def run(io = $stdout)
-    report = Report.new(io)
+  def run(report)
     test_names = public_methods(false).grep(/^test_/)
 
     test_names.each do |test|
@@ -45,7 +48,6 @@ class TestSuite
       end
       report.add_result(result)
     end
-    report.summarize
     report
   end
 
