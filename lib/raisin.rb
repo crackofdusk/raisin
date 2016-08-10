@@ -115,7 +115,7 @@ class Report
     @errors.each do |failure|
       io.puts
       io.puts failure.message
-      io.puts failure.backtrace
+      io.puts filter(failure.backtrace)
       io.puts
     end
     io.puts
@@ -123,6 +123,10 @@ class Report
   end
 
   private
+
+  def filter(backtrace)
+    backtrace.reject { |line| line =~ /lib\/raisin/ }
+  end
 
   attr_accessor :io
 end
