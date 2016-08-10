@@ -1,4 +1,4 @@
-require_relative './autorun'
+require_relative '../lib/raisin/autorun'
 
 class NothingRaised < StandardError
 end

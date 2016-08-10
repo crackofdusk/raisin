@@ -1,4 +1,4 @@
-require_relative './raisin'
+require_relative '../raisin'
 
 module Raisin
   @@at_exit_registered ||= false
