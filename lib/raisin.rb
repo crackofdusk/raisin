@@ -1,3 +1,45 @@
+require 'optparse'
+
+module Raisin
+  def self.run(args)
+    options = RunOptions.parse(args)
+    TestSuite.run(options)
+  end
+end
+
+class RunOptions
+  attr_reader :seed
+
+  def self.parse(arguments = [])
+    program_options = {}
+
+    parser = OptionParser.new do |options|
+      options.on('-h', '--help', 'Display this help') do
+        puts options
+        exit
+      end
+
+      options.on('--seed SEED', Integer, 'Set random seed') do |value|
+        program_options[:seed] = value.to_i
+      end
+    end
+
+    parser.parse!(arguments)
+
+    new(program_options.fetch(:seed, Random.new_seed))
+  end
+
+  def invocation_command
+    ['ruby', $PROGRAM_NAME, '--seed', seed].join(" ")
+  end
+
+  private
+
+  def initialize(seed)
+    @seed = seed
+  end
+end
+
 class AssertionError < StandardError
 end
 
@@ -27,20 +69,20 @@ class TestSuite
     @suites.delete(suite)
   end
 
-  def self.run(io = $stdout)
-    report = Report.new(io)
+  def self.run(io = $stdout, options)
+    report = Report.new(io, options)
 
     @suites.each do |suite|
-      suite.new.run(report)
+      suite.new.run(report, options)
     end
 
     report.summarize
   end
 
-  def run(report)
+  def run(report, options)
     test_names = public_methods(false).grep(/^test_/)
 
-    test_names.each do |test|
+    test_names.shuffle(random: Random.new(options.seed)).each do |test|
       result = TestResult.from do
         setup
         send(test)
@@ -90,10 +132,11 @@ end
 class Report
   attr_reader :runs
 
-  def initialize(io)
+  def initialize(io, options)
     @io = io
     @runs = 0
     @errors = []
+    @options = options
   end
 
   def add_result(result)
@@ -120,6 +163,9 @@ class Report
     end
     io.puts
     io.puts "#{runs} runs, #{failures} failures"
+    io.puts
+    io.puts 'Rerun the tests in the same order with:'
+    io.puts options.invocation_command
   end
 
   private
@@ -129,4 +175,5 @@ class Report
   end
 
   attr_accessor :io
+  attr_reader :options
 end

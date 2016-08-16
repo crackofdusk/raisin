@@ -5,7 +5,7 @@ module Raisin
 
   def self.autorun
     unless @@at_exit_registered
-      at_exit { TestSuite.run }
+      at_exit { Raisin.run(ARGV) }
       @@at_exit_registered = true
     end
   end

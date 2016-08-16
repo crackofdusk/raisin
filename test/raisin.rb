@@ -57,7 +57,8 @@ class ReportingTests < TestSuite
     end
 
     output = StringIO.new
-    report = suite.new.run(Report.new(output))
+    options = RunOptions.parse([])
+    report = suite.new.run(Report.new(output, options), options)
     report.summarize
 
     assert_equal(2, report.runs)
@@ -78,14 +79,34 @@ class ReportingTests < TestSuite
     end
 
     output = StringIO.new
-    report = Report.new(output)
-    suite.new.run(report)
+    options = RunOptions.parse([])
+    report = Report.new(output, options)
+    suite.new.run(report, options)
     report.summarize
 
     assert(output.string.include?("failure1"),
            "Report does not include error details")
     assert(output.string.include?("failure2"),
            "Report does not include error details")
+  end
+
+  def test_order
+    suite = define_suite do
+      def test_1
+        assert(false)
+      end
+
+      def test_2
+        assert(true)
+      end
+    end
+
+    output = StringIO.new
+    options = RunOptions.parse(%w[--seed 2])
+    report = Report.new(output, options)
+    suite.new.run(report, options)
+
+    assert_equal('.F', output.string)
   end
 end
 
