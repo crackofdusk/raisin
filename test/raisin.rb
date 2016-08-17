@@ -3,7 +3,7 @@ require_relative '../lib/raisin/autorun'
 class NothingRaised < StandardError
 end
 
-class AssertionTests < TestSuite
+class AssertionTests < Raisin::TestSuite
   def test_true
     assert(true)
   end
@@ -37,14 +37,14 @@ class AssertionTests < TestSuite
     raised = false
     begin
       yield
-    rescue AssertionError
+    rescue Raisin::AssertionError
       raised = true
     end
     raise NothingRaised unless raised
   end
 end
 
-class ReportingTests < TestSuite
+class ReportingTests < Raisin::TestSuite
   def test_statistics
     suite = define_suite do
       def test_equality
@@ -57,8 +57,8 @@ class ReportingTests < TestSuite
     end
 
     output = StringIO.new
-    options = RunOptions.parse([])
-    report = suite.new.run(Report.new(output, options), options)
+    options = Raisin::RunOptions.parse([])
+    report = suite.new.run(Raisin::Report.new(output, options), options)
     report.summarize
 
     assert_equal(2, report.runs)
@@ -79,8 +79,8 @@ class ReportingTests < TestSuite
     end
 
     output = StringIO.new
-    options = RunOptions.parse([])
-    report = Report.new(output, options)
+    options = Raisin::RunOptions.parse([])
+    report = Raisin::Report.new(output, options)
     suite.new.run(report, options)
     report.summarize
 
@@ -102,8 +102,8 @@ class ReportingTests < TestSuite
     end
 
     output = StringIO.new
-    options = RunOptions.parse(%w[--seed 2])
-    report = Report.new(output, options)
+    options = Raisin::RunOptions.parse(%w[--seed 2])
+    report = Raisin::Report.new(output, options)
     suite.new.run(report, options)
 
     assert_equal('.F', output.string)
@@ -111,7 +111,7 @@ class ReportingTests < TestSuite
 end
 
 def define_suite(&block)
-  suite = Class.new(TestSuite, &block)
-  TestSuite.unregister(suite)
+  suite = Class.new(Raisin::TestSuite, &block)
+  Raisin::TestSuite.unregister(suite)
   suite
 end
