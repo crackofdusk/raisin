@@ -39,6 +39,18 @@ test_failure do
 end
 
 class TestSuite
+  @suites = []
+
+  def self.inherited(suite)
+    @suites << suite
+  end
+
+  def self.run
+    @suites.each do |suite|
+      suite.new.run
+    end
+  end
+
   def run
     test_names = public_methods(false).grep(/^test_/)
 
