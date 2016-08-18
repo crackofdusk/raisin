@@ -52,13 +52,22 @@ class TestSuite
   end
 
   def run
+    runs = 0
+    failures = 0
     test_names = public_methods(false).grep(/^test_/)
 
     test_names.each do |test|
       setup
-      send(test)
+      begin
+        send(test)
+      rescue AssertionError
+        failures = failures + 1
+      end
+      runs = runs + 1
       teardown
     end
+
+    Report.new(runs, failures)
   end
 
   def setup
@@ -68,21 +77,27 @@ class TestSuite
   end
 end
 
-def greet(name = nil)
-  ['Hello', name].compact.join(", ") + "!"
-end
+class Report
+  attr_reader :runs, :failures
 
-class GreetingTestSuite < TestSuite
-  def test_with_name
-    assert_equal("Hello, Bob!", greet("Bob"))
-  end
-
-  def test_without_name
-    assert_equal("Hello!", greet)
+  def initialize(runs, failures)
+    @runs = runs
+    @failures = failures
   end
 end
 
-GreetingTestSuite.new.run
+class DummySuite < TestSuite
+  def test_equality
+    assert_equal(1, 2) # should fail
+  end
 
+  def test_the_truth
+    assert(true)
+  end
+end
+
+result = DummySuite.new.run
+assert_equal 2, result.runs
+assert_equal 1, result.failures
 
 puts "Success!"
