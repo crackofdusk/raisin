@@ -162,6 +162,18 @@ module Raisin
     end
 
     def summarize
+      print_errors
+      print_totals
+      print_invocation_command
+    end
+
+    private
+
+    def filter(backtrace)
+      backtrace.reject { |line| line =~ /lib\/raisin/ }
+    end
+
+    def print_errors
       io.puts
       @errors.each do |failure|
         io.puts
@@ -170,16 +182,16 @@ module Raisin
         io.puts
       end
       io.puts
-      io.puts "#{runs} runs, #{failures} failures"
-      io.puts
-      io.puts 'Rerun the tests in the same order with:'
-      io.puts options.invocation_command
     end
 
-    private
+    def print_totals
+      io.puts "#{runs} runs, #{failures} failures"
+      io.puts
+    end
 
-    def filter(backtrace)
-      backtrace.reject { |line| line =~ /lib\/raisin/ }
+    def print_invocation_command
+      io.puts 'Rerun the tests in the same order with:'
+      io.puts options.invocation_command
     end
 
     attr_accessor :io
