@@ -1,0 +1,23 @@
+= Toy self-testing Ruby test library
+
+Read about the process of writing this library in the {accompanying blog post}[https://dimiterpetrov.com/blog/self-testing-test-library/].
+
+== Usage
+
+Define a test suite by inheriting from +Raisin::TestSuite+ and start all test names with +test_+.
+
+    require 'raisin/autorun'
+
+    class DummyTest < Raisin::TestSuite
+      def test_equality
+        assert_equal 'foo', %w(f o o).join
+      end
+    end
+
+By requiring the test auto-runner like in the example above, you can run the tests simply by executing the ruby script in which they are defined.
+
+== Development
+
+Run the tests with
+
+    ruby test/raisin.rb

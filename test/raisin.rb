@@ -24,7 +24,7 @@ class AssertionTests < Raisin::TestSuite
   end
 
   def test_equal
-    assert_equal("foo", 'foo')
+    assert_equal("foo", %w(f o o).join)
     assert_equal(1, 1)
   end
 
