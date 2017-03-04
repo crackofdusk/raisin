@@ -197,15 +197,15 @@ module Raisin
       if result.success?
         io.print "."
       else
-        @errors << result.error
+        errors << result.error
         io.print "F"
       end
-      @runs = @runs + 1
+      self.runs = runs + 1
     end
 
     # Number of failed tests
     def failures
-      @errors.count
+      errors.count
     end
 
     # Prints error messages of failing tests and a summary of all accumulated
@@ -226,7 +226,7 @@ module Raisin
 
     def print_errors
       io.puts
-      @errors.each do |failure|
+      errors.each do |failure|
         io.puts
         io.puts failure.message
         io.puts filter(failure.backtrace)
@@ -245,7 +245,8 @@ module Raisin
       io.puts options.invocation_command
     end
 
-    attr_accessor :io
+    attr_accessor :io, :errors
     attr_reader :options
+    attr_writer :runs
   end
 end
